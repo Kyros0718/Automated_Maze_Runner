@@ -208,6 +208,9 @@ while stack: #Generate Maze until stack is empty
             
             en_cell.entrance["top"] = True
             ex_cell.exit["bottom"] = True
+            
+            en_cell.cell_check("top").trail = True
+            en_cell.cell_check("top").path["bottom"]=True
 
         else: #Left/Right
             en_cell = grid_cells[choice(range(2,rows-2))*(cols)+2]
@@ -220,6 +223,8 @@ while stack: #Generate Maze until stack is empty
             en_cell.entrance["left"] = True
             ex_cell.exit["right"] = True
             
+            en_cell.cell_check("left").trail = True
+            en_cell.cell_check("left").path["right"] = True
 
 def deny_visit(var):
     var.visited = False
@@ -237,6 +242,10 @@ while not run_finished:
             exit()
     
     if any([current_cell.exit["bottom"],current_cell.exit["right"]]):
+        if current_cell.exit["bottom"]:
+            current_cell.path["bottom"] = True
+        else:
+            current_cell.path["right"] = True
         run_finished = True
 
     [cell.draw() for cell in grid_cells] #Draw The Cell Graph
@@ -262,6 +271,8 @@ while True:
     for event in pygame.event.get(): #Retrieve all event that have occurred since this the last time this function was called
         if event.type == pygame.QUIT: #End Loop when Press (X) Button
             exit()
+
+
 
 
 
