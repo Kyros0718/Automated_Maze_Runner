@@ -67,8 +67,14 @@ class Cell:
         if self.entrance['left']:
             pygame.draw.ellipse(sc, pygame.Color(entrance_color),(x-2*TILE, y , TILE , TILE))
 
-        if self.trail: #Draw Runner Trail
-            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE- wall_thickness*2 , TILE - wall_thickness*2))
+        if self.trail and self.path["top"]: #Draw Runner
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y-1*TILE + wall_thickness, TILE - wall_thickness*2 , TILE*2 - wall_thickness*2))
+        if self.trail and self.path["right"]:
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE*2 - wall_thickness*2 , TILE - wall_thickness*2))
+        if self.trail and self.path["bottom"]:
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE - wall_thickness*2 , TILE*2 - wall_thickness*2))
+        if self.trail and self.path["left"]:
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x-1*TILE + wall_thickness, y + wall_thickness, TILE*2 - wall_thickness*2 , TILE - wall_thickness*2))
                 
     def check_cell(self, x, y): #Locate a Cell by its Position
         find_index = lambda x,y: x+y*cols
@@ -108,13 +114,26 @@ class Cell:
         bottom = self.check_cell(self.x, self.y + 1)
         left = self.check_cell(self.x - 1, self.y)
         if not self.walls["left"] and not left.visited and not left.barrier:
+            true_path(self,3)
             return left
+        
         elif not self.walls["top"] and not top.visited and not top.barrier:
+            true_path(self,0)
             return top
         elif not self.walls["bottom"] and not bottom.visited and not bottom.barrier:
+            true_path(self,2)
             return bottom
         elif not self.walls["right"] and not right.visited and not right.barrier:
+            true_path(self,1)
             return right
+
+def true_path(cell,side):
+    pathway = ["top","right","bottom","left"]
+    next_path = pathway.pop(side)
+    cell.path[next_path] = True
+    cell.path[pathway[0]] = False
+    cell.path[pathway[1]] = False
+    cell.path[pathway[2]] = False
 
         
 def remove_walls(current, next): #Remove The Wall between the current and next cell
