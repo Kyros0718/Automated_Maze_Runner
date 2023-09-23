@@ -3,12 +3,14 @@ from random import choice
 
 
 ##### MAZE ATTRIBUTES
-maze_size = [30,30]
+maze_size = [33,33]
 
 maze_wall_color = 'black'
 background_color = 'light grey'
 entrance_color = "maroon"
 exit_color = entrance_color
+
+runner_color = "maroon"
 
 maze_size = [maze_size[0]+4,maze_size[1]+4]
 wall_thickness = int(10-(max(maze_size)-4)*(2/25))
@@ -40,6 +42,7 @@ class Cell:
         self.barrier = False
         self.entrance = {'top': False, 'left': False}
         self.exit = {'right': False, 'bottom': False}
+        self.runner = False
 
 
     def draw(self): #Determine Cell's Visuals [Width/Height, Border Color]
@@ -54,7 +57,7 @@ class Cell:
         if self.walls['left']:
             pygame.draw.line(sc, pygame.Color(maze_wall_color), (x, y + TILE), (x, y), wall_thickness)
             
-        if self.entrance['top']: #Draw Entrance/Exit
+        if self.entrance['top']: #Draw Entrance/Exit Beacon
             pygame.draw.ellipse(sc, pygame.Color(entrance_color),(x, y-2*TILE , TILE , TILE))
         if self.exit['right']:
             pygame.draw.ellipse(sc, pygame.Color(exit_color),(x+2*TILE, y , TILE , TILE))
@@ -62,7 +65,9 @@ class Cell:
             pygame.draw.ellipse(sc, pygame.Color(exit_color),(x, y+2*TILE , TILE , TILE))
         if self.entrance['left']:
             pygame.draw.ellipse(sc, pygame.Color(entrance_color),(x-2*TILE, y , TILE , TILE))
-                
+
+        if self.runner: #Draw Runner
+            pygame.draw.rect(sc, pygame.Color(runner_color), (x + wall_thickness, y + wall_thickness, TILE- wall_thickness*2 , TILE - wall_thickness*2))
                 
     def check_cell(self, x, y): #Locate a Cell by its Position
         find_index = lambda x,y: x+y*cols
@@ -92,7 +97,24 @@ class Cell:
         list(map(lambda x: neighbors.append(x) if x and not x.visited and not x.barrier else False, [top,right,bottom,left]))
             
         return choice(neighbors) if neighbors else False
-        
+
+
+    ##### MAZE RUNNER
+    def find_path(self):
+        neighbors = []
+        top = self.check_cell(self.x, self.y - 1)
+        right = self.check_cell(self.x+1, self.y)
+        bottom = self.check_cell(self.x, self.y + 1)
+        left = self.check_cell(self.x - 1, self.y)
+        if not self.walls["left"] and not left.visited and not left.barrier:
+            return left
+        elif not self.walls["top"] and not top.visited and not top.barrier:
+            return top
+        elif not self.walls["bottom"] and not bottom.visited and not bottom.barrier:
+            return bottom
+        elif not self.walls["right"] and not right.visited and not right.barrier:
+            return right
+
         
 def remove_walls(current, next): #Remove The Wall between the current and next cell
     def wall_setFalse(a,b):
@@ -179,20 +201,48 @@ while stack: #Generate Maze until stack is empty
             ex_cell.exit["right"] = True
             
 
+def deny_visit(var):
+    var.visited = False
+list(map(lambda x: deny_visit(x), grid_cells))
+
+current_cell = en_cell
 
 ##### Actualize the Game
-while True:
+run_finished = False
+while not run_finished:
     sc.fill(pygame.Color(background_color)) #Determine BackGround Color
     
     for event in pygame.event.get(): #Retrieve all event that have occurred since this the last time this function was called
         if event.type == pygame.QUIT: #End Loop when Press (X) Button
             exit()
     
-    
+    if any([current_cell.exit["bottom"],current_cell.exit["right"]]):
+        run_finished = True
+
     [cell.draw() for cell in grid_cells] #Draw The Cell Graph
     
+    current_cell.runner = True
+    current_cell.visited = True
+       
+    next_cell = current_cell.find_path() # Visit A New Neighboribng Cell
+    if next_cell:
+        next_cell.runner = True
+        next_cell.visit = True
+        stack.append(current_cell)
+        current_cell = next_cell #Make New Cell the current Cell
     
+    elif stack:
+        current_cell.runner = False
+        current_cell = stack.pop()
+
     pygame.display.flip() #Update Contents of Entire Display
+
+
+while True:
+    for event in pygame.event.get(): #Retrieve all event that have occurred since this the last time this function was called
+        if event.type == pygame.QUIT: #End Loop when Press (X) Button
+            exit()
+
 
 
 
