@@ -10,7 +10,7 @@ background_color = 'light grey'
 entrance_color = "maroon"
 exit_color = entrance_color
 
-runner_color = "maroon"
+trail_color = "maroon"
 
 maze_size = [maze_size[0]+4,maze_size[1]+4]
 wall_thickness = int(10-(max(maze_size)-4)*(2/25))
@@ -35,14 +35,15 @@ sc = pygame.display.set_mode(RES) #Set display Windows Width/Height Parameter
 
 ##### Construct a Graph made of Individual Interactive Cells
 class Cell:
-    def __init__(self, x,y): #Determine Cell's Properties: [Coordinates, Walls, Visited, Barrier Entrance, Exit]
+    def __init__(self, x,y): #Determine Cell's Properties: General[Coordinates, Visited],Maze[Walls, Barrier, Entrance, Exit], Runner[Trail, Direction]
         self.x, self.y = x, y
-        self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True}
-        self.visited = False
         self.barrier = False
+        self.walls = {'top': True, 'right': True, 'bottom': True, 'left': True}
         self.entrance = {'top': False, 'left': False}
         self.exit = {'right': False, 'bottom': False}
-        self.runner = False
+        self.visited = False
+        self.trail = False
+        self.path = {'top': False, 'right': False, 'bottom': False, 'left': False}
 
 
     def draw(self): #Determine Cell's Visuals [Width/Height, Border Color]
@@ -66,8 +67,8 @@ class Cell:
         if self.entrance['left']:
             pygame.draw.ellipse(sc, pygame.Color(entrance_color),(x-2*TILE, y , TILE , TILE))
 
-        if self.runner: #Draw Runner
-            pygame.draw.rect(sc, pygame.Color(runner_color), (x + wall_thickness, y + wall_thickness, TILE- wall_thickness*2 , TILE - wall_thickness*2))
+        if self.trail: #Draw Runner Trail
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE- wall_thickness*2 , TILE - wall_thickness*2))
                 
     def check_cell(self, x, y): #Locate a Cell by its Position
         find_index = lambda x,y: x+y*cols
@@ -221,18 +222,18 @@ while not run_finished:
 
     [cell.draw() for cell in grid_cells] #Draw The Cell Graph
     
-    current_cell.runner = True
+    current_cell.trail = True
     current_cell.visited = True
        
     next_cell = current_cell.find_path() # Visit A New Neighboribng Cell
     if next_cell:
-        next_cell.runner = True
+        next_cell.trail = True
         next_cell.visit = True
         stack.append(current_cell)
         current_cell = next_cell #Make New Cell the current Cell
     
     elif stack:
-        current_cell.runner = False
+        current_cell.trail = False
         current_cell = stack.pop()
 
     pygame.display.flip() #Update Contents of Entire Display
