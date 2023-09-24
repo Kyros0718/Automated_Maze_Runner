@@ -1,5 +1,6 @@
 # Automated_Maze_Runner
 >  Solve Mazes by Utilizing Algorithms: _Depth-First Search_
+https://github.com/Kyros0718/Automated_Maze_Runner/blob/main/Assets/15x15_Solved-Maze.png
 
 &nbsp;
 
