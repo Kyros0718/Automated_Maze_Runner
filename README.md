@@ -26,8 +26,7 @@ https://github.com/Kyros0718/Automated_Maze_Runner/assets/140636813/12236eaa-740
 
 ###
 > [!IMPORTANT]  
-> **Language:** _Python_
->
-> **Import:**
+> **Language:** _Python_  
+> **Imports:**
 > - _pygame_
 > - _choice_ (module: random) 
