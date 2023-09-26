@@ -1,6 +1,5 @@
-import pygame
+import pygame, math
 from random import choice
-
 
 ##### MAZE ATTRIBUTES
 maze_size = [33,33]
@@ -11,6 +10,7 @@ entrance_color = "maroon"
 exit_color = entrance_color
 
 trail_color = "maroon"
+trail_thickness = 5.5
 
 maze_size = [maze_size[0]+4,maze_size[1]+4]
 wall_thickness = int(10-(max(maze_size)-4)*(2/25))
@@ -66,15 +66,17 @@ class Cell:
             pygame.draw.ellipse(sc, pygame.Color(exit_color),(x, y+2*TILE , TILE , TILE))
         if self.entrance['left']:
             pygame.draw.ellipse(sc, pygame.Color(entrance_color),(x-2*TILE, y , TILE , TILE))
-
+        
+        scale = trail_thickness/10
+        adjust = TILE*(1-scale)/(0.2139*math.log(57.541343*TILE))
         if self.trail and self.path["top"]: #Draw Runner
-            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y-1*TILE + wall_thickness, TILE - wall_thickness*2 , TILE*2 - wall_thickness*2))
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x+adjust, y-TILE+adjust, TILE*scale, TILE*(1+scale)))
         if self.trail and self.path["right"]:
-            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE*2 - wall_thickness*2 , TILE - wall_thickness*2))
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x+adjust, y+adjust, TILE*(1+scale), TILE*scale))
         if self.trail and self.path["bottom"]:
-            pygame.draw.rect(sc, pygame.Color(trail_color), (x + wall_thickness, y + wall_thickness, TILE - wall_thickness*2 , TILE*2 - wall_thickness*2))
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x+adjust, y+adjust, TILE*scale, TILE*(1+scale)))
         if self.trail and self.path["left"]:
-            pygame.draw.rect(sc, pygame.Color(trail_color), (x-1*TILE + wall_thickness, y + wall_thickness, TILE*2 - wall_thickness*2 , TILE - wall_thickness*2))
+            pygame.draw.rect(sc, pygame.Color(trail_color), (x-TILE+adjust, y+adjust, TILE*(1+scale), TILE*scale))
                 
     def check_cell(self, x, y): #Locate a Cell by its Position
         find_index = lambda x,y: x+y*cols
@@ -166,8 +168,6 @@ def set_walls(cell,sides,bools):
 grid_cells = [Cell(col, row) for row in range(rows) for col in range(cols)] #Create a List of Cells with (X,Y) Positions 
 
 ##### Define Barriers of graph
-
-
 list(map(lambda x: list(map(lambda y: set_barrier(grid_cells[x+y]), [0,cols, (rows-1)*(cols),(rows-2)*(cols)])), range(cols))) #Top/Bottom Barriers
 list(map(lambda x: list(map(lambda y: set_barrier(grid_cells[x*cols+y]), [0,1, cols-1,cols-2])), range(rows))) #Left/Right Barriers
 
@@ -240,16 +240,17 @@ while not run_finished:
     for event in pygame.event.get(): #Retrieve all event that have occurred since this the last time this function was called
         if event.type == pygame.QUIT: #End Loop when Press (X) Button
             exit()
-    
+
     if any([current_cell.exit["bottom"],current_cell.exit["right"]]):
         if current_cell.exit["bottom"]:
             current_cell.path["bottom"] = True
         else:
             current_cell.path["right"] = True
         run_finished = True
-
+        
     [cell.draw() for cell in grid_cells] #Draw The Cell Graph
     
+
     current_cell.trail = True
     current_cell.visited = True
        
@@ -263,6 +264,8 @@ while not run_finished:
     elif stack:
         current_cell.trail = False
         current_cell = stack.pop()
+    
+
 
     pygame.display.flip() #Update Contents of Entire Display
 
@@ -271,6 +274,7 @@ while True:
     for event in pygame.event.get(): #Retrieve all event that have occurred since this the last time this function was called
         if event.type == pygame.QUIT: #End Loop when Press (X) Button
             exit()
+
 
 
 
